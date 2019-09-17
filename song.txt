@@ -1,10 +1,24 @@
  The Git feature that really makes it stand apart from nearly every other SCM out there is its branching model.
 
-Git allows and encourages you to have multiple local branches that can be entirely independent of each other. The creation, merging, and deletion of those lines of development takes seconds.
+Ключевой вопрос этой задачи: метод initialize() в конструкторе класса А вызывается как "initialize() класса А" или "initialize() класса В"? Для ответа надо знать следующее:
 
-This means that you can do things like:
+Порядок обработки кода:
+1) Компилятор преобразует джава-код в байт-код (программа еще не выполняется)
+2) Джава-машина выполняет байт-код (собственно выполнение программы)
 
-    Frictionless Context Switching. Create a branch to try out an idea, commit a few times, switch back to where you branched from, apply a patch, switch back to where you are experimenting, and merge it in.
-    Role-Based Codelines. Have a branch that always contains only what goes to production, another that you merge work into for testing, and several smaller ones for day to day work.
-    Feature Based Workflow. Create new branches for each new feature you're working on so you can seamlessly switch back and forth between them, then delete each branch when that feature gets merged into your main line.
-    Disposable Experimentation. Create a branch to experiment in, realize it's not going to work, and just delete it - abandoning the work—with nobody else ever seeing it (even if you've pushed other branches in the meantime).
+Порядок инициализации классов и новых объектов:
+1) Статические элементы
+2) Нестатические переменные родителя
+3) Конструктор родителя
+4) Нестатич-ие переменные наследника
+5) Конструктор наследника
+
+В объекте класса В создается 2 переменных f1.
+
+а) Ситуация до исправления модификатора.
+При вызове new B(6) сначала происходит вызов конструктора класса А, а переменная f1 в коде класса В еще не инициализировалась и равна 0. В конструкторе класса А происходит вызов метода initialize(). Поскольку этот метод может быть переопределен в классах-наследниках, то компилятор не привязывает вызов этого метода к "initialize() класса А", а отдает этот вопрос на решение джава-машины. Джава-машина видит, что метод вызван из "объекта класса В" (потому как new B(6)), и соответственно вызывает "initialize() класса В". Однако переменная f1 в коде класса В еще не успела инициализоваться (см. порядок инициализации), поэтому выводится 0.
+
+б) Ситуация после исправления модификатора.
+Все то же самое, но теперь компилятор считает, что приватный метод "initialize() класса А" переопределяться не будет. Поэтому он жестко привязывает вызов метода initialize() в конструкторе А к "initialize() класса А" еще ДО выполнения программы. И джава-машине ничего не остается как вызывать там метод initialize() именно класса А, а не класса В.
+
+В интернете где-то есть по этому поводу информация, что в джаве (в отличие от С++) для приватных и финальных методов применяется раннее связывание (на уровне компилятора до выполнения программы), а для "обычных" методов - позднее связывание (на уровне джава-машины во время выполнения).
